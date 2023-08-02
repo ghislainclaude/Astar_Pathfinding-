@@ -4,11 +4,31 @@ This project demonstrates the A* pathfinding algorithm using a grid-based visual
 
 ## Getting Started
 
-To run this project locally, follow these steps:
+To run this web application locally, follow these steps:
 
-1. Clone the repository to your local machine.
-2. Open the `index.html` file in a web browser.
-3. Follow the instructions on the page to set obstacles, start and end points, and find the path.
+1. Clone or download the repository to your local machine.
+
+2. Open the project in Visual Studio:
+
+   a. Launch Visual Studio.
+   b. Click on "File" > "Open" > "Project/Solution".
+   c. Navigate to the location where you cloned/downloaded the repository and select the `.sln` file.
+
+3. Build the Solution:
+
+   a. Once the project is open in Visual Studio, right-click on the solution in the Solution Explorer.
+   b. Select "Build" to compile the project.
+
+4. Run the Application:
+
+   a. After building the solution, right-click on the project name in the Solution Explorer.
+   b. Choose "Set as StartUp Project".
+   c. Press the "Start" button (or F5) to run the application.
+   
+5. Open the Web Application in a Browser:
+
+   a. The web application should launch in your default web browser.
+   b. Follow the instructions on the page to set obstacles, start and end points, and find the path.
 
 Here are some screenshots of the project in action:
 
