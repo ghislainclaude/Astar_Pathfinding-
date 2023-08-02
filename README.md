@@ -22,8 +22,9 @@ Here are some screenshots of the project in action:
 3. Adding Obstacles: Mouse down 
 
 4. Finding the Path:
-  ![Uploading A3.png…]()
-   
+  
+   ![A3](https://github.com/ghislainclaude/Astar_Pathfinding-/assets/45498219/b9f57f3a-5d3d-4a34-b076-b8138b5aca00)
+
 
 ## Adjusting Animation Speed
 
