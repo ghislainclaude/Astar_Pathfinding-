@@ -1,0 +1,233 @@
+﻿@model GridModel
+
+@{
+   
+}
+
+<style>
+    .grid-container {
+        overflow: auto;
+        width: 100%; /* Set the initial size of the grid container */
+        height: 100%;
+    }
+
+    .grid {
+        border-collapse: collapse;
+        width: 1000px;
+        height: 1000px
+
+    }
+
+    .cell {
+        width: 20px;
+        height: 20px;
+        min-width: 5px; /* Set a minimum size for the grid cells */
+        min-height: 5px;
+        border: 1px solid #ccc;
+        text-align: center;
+        cursor: pointer;
+    }
+
+    .cell.obstacle {
+        background-color: black;
+    }
+
+    .cell.start {
+        background-color: green;
+    }
+
+    .cell.end {
+        background-color: red;
+    }
+
+    .cell.path-node {
+        background-color: cyan;
+    }
+</style>
+
+<div class="grid-container" onmousewheel="zoomGrid(event)">
+    <table class="grid" id="gridTable">
+        @for (int y = 0; y < Model.Height; y++)
+        {
+            <tr>
+                @for (int x = 0; x < Model.Width; x++)
+                {
+                    var node = Model.Nodes[x, y];
+                    var cellClass = node.IsObstacle ? "obstacle" : "";
+                    if (node == Model.StartNode)
+                    {
+                        cellClass += " start";
+                    }
+                    else if (node == Model.EndNode)
+                    {
+                        cellClass += " end";
+                    }
+
+                    <td class="cell @cellClass" data-x="@x" data-y="@y"></td>
+                }
+            </tr>
+        }
+    </table>
+    <button id="findPathButton">Find Path</button>
+</div>
+
+<script>
+    /* JavaScript zooming code remains the same... */
+
+    // Variables to store the coordinates of start and end points
+    let startCellX = -1;
+    let startCellY = -1;
+    let endCellX = -1;
+    let endCellY = -1;
+
+    
+
+    function calculateHeuristic(currentNode, endNode) {
+        return Math.abs(currentNode.x - endNode.x) + Math.abs(currentNode.y - endNode.y);
+    }
+
+    // QuickSort algorithm to sort the open set based on the f cost of nodes
+    function quickSort(arr) {
+        if (arr.length <= 1) return arr;
+
+        const pivot = arr[Math.floor(arr.length / 2)];
+        const left = [];
+        const right = [];
+
+        for (let i = 0; i < arr.length; i++) {
+            if (arr[i].f < pivot.f) {
+                left.push(arr[i]);
+            } else if (arr[i].f > pivot.f) {
+                right.push(arr[i]);
+            }
+        }
+
+        return [...quickSort(left), pivot, ...quickSort(right)];
+    }
+
+    // A* pathfinding algorithm
+    function findPath() {
+        // Check if both start and end nodes are set
+        if (startCellX === -1 || startCellY === -1 || endCellX === -1 || endCellY === -1) {
+            alert('Please set both start and end points before finding the path.');
+            return;
+        }
+
+        // Create open and closed sets
+        let openSet = [{ x: startCellX, y: startCellY }];
+        const closedSet = [];
+
+        // Main loop
+        const pathAnimationInterval = 1000; // Adjust the interval to control the visualization speed
+        const intervalId = setInterval(() => {
+            if (openSet.length === 0) {
+                // No path found
+                clearInterval(intervalId);
+                alert('No path found.');
+                return;
+            }
+
+            // Sort the open set based on the f cost of nodes (using QuickSort)
+            openSet = quickSort(openSet);
+
+            // Find the node with the lowest total cost (f = g + h)
+            const currentNode = openSet.shift();
+
+            // Move the currentNode from the open set to the closed set
+            closedSet.push(currentNode);
+
+            // If the currentNode is the end node, reconstruct the path and visualize it
+            if (currentNode.x === endCellX && currentNode.y === endCellY) {
+                let pathNode = currentNode;
+                while (pathNode) {
+                    const cellElement = document.querySelector(`.cell[data-x="${pathNode.x}"][data-y="${pathNode.y}"]`);
+                    cellElement.classList.add('path-node');
+                    pathNode = pathNode.parent;
+                }
+                clearInterval(intervalId);
+                return;
+            }
+
+            // Expand neighbors (adjacent cells)
+            const neighbors = [
+                { x: currentNode.x - 1, y: currentNode.y }, // Left
+                { x: currentNode.x + 1, y: currentNode.y }, // Right
+                { x: currentNode.x, y: currentNode.y - 1 }, // Top
+                { x: currentNode.x, y: currentNode.y + 1 }  // Bottom
+            ];
+
+            neighbors.forEach(neighbor => {
+                // Check if the neighbor is a valid cell (inside the grid)
+                if (neighbor.x >= 0 && neighbor.x < @Model.Width && neighbor.y >= 0 && neighbor.y < @Model.Height) {
+                    // Check if the neighbor is not an obstacle and not in the closed set
+                    if (!document.querySelector(`.cell.obstacle[data-x="${neighbor.x}"][data-y="${neighbor.y}"]`) &&
+                        !closedSet.some(node => node.x === neighbor.x && node.y === neighbor.y)) {
+                        // Calculate the tentative cost from the starting node to the neighbor
+                        const tentativeG = currentNode.g + 1;
+
+                        // Check if the neighbor is not in the open set or the new cost is lower
+                        let neighborNode = openSet.find(node => node.x === neighbor.x && node.y === neighbor.y);
+                        if (!neighborNode) {
+                            // Add the neighbor to the open set with the calculated cost and parent
+                            neighborNode = { x: neighbor.x, y: neighbor.y };
+                            neighborNode.g = tentativeG;
+                            neighborNode.h = calculateHeuristic(neighborNode, { x: endCellX, y: endCellY });
+                            neighborNode.f = neighborNode.g + neighborNode.h;
+                            neighborNode.parent = currentNode;
+                            openSet.push(neighborNode);
+                        } else if (tentativeG < neighborNode.g) {
+                            // Update the neighbor's cost and parent
+                            neighborNode.g = tentativeG;
+                            neighborNode.f = neighborNode.g + neighborNode.h;
+                            neighborNode.parent = currentNode;
+                        }
+                    }
+                }
+            });
+        }, pathAnimationInterval);
+    }
+
+    //// Function to handle click on a cell (same as before...)
+    //document.querySelectorAll('.cell').forEach(function (cell) {
+    //    cell.addEventListener('click', function (event) {
+    //    });
+    //});
+    // Function to handle click on a cell
+    document.querySelectorAll('.cell').forEach(function (cell) {
+        cell.addEventListener('click', function (event) {
+            const x = parseInt(cell.getAttribute('data-x'));
+            const y = parseInt(cell.getAttribute('data-y'));
+
+            // Check if Shift key is pressed for start node
+            if (event.shiftKey) {
+                startCellX = x;
+                startCellY = y;
+                document.querySelectorAll('.cell.start').forEach(function (el) {
+                    el.classList.remove('start');
+                });
+                cell.classList.add('start');
+            }
+            // Check if Ctrl key is pressed for end node
+            else if (event.ctrlKey) {
+                endCellX = x;
+                endCellY = y;
+                document.querySelectorAll('.cell.end').forEach(function (el) {
+                    el.classList.remove('end');
+                });
+                cell.classList.add('end');
+            }
+            // Otherwise, toggle obstacle
+            else {
+                cell.classList.toggle('obstacle');
+            }
+        });
+    });
+
+    // Function to handle click on the "Find Path" button (same as before...)
+    document.getElementById('findPathButton').addEventListener('click', function () {
+        // If the start and end points are set, call the A* pathfinding function and visualize the path
+        if (startCellX !== -1 && startCellY !== -1 && endCellX !== -1 && endCellY !== -1) {
+            findPath();
+        }
+    });
+</script>

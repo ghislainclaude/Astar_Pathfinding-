@@ -1,0 +1,22 @@
+﻿.grid {
+    border-collapse: collapse;
+}
+
+.cell {
+    width: 20px;
+    height: 20px;
+    border: 1px solid #ccc;
+    text-align: center;
+}
+
+    .cell.obstacle {
+        background-color: #999;
+    }
+
+    .cell.start {
+        background-color: green;
+    }
+
+    .cell.end {
+        background-color: red;
+    }
