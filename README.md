@@ -46,10 +46,5 @@ Here are some screenshots of the project in action:
    ![A3](https://github.com/ghislainclaude/Astar_Pathfinding-/assets/45498219/b9f57f3a-5d3d-4a34-b076-b8138b5aca00)
 
 
-## Adjusting Animation Speed
 
-If you want to adjust the animation speed of the A* pathfinding visualization, you can modify the `pathAnimationInterval` variable in the `index.html` file. Increasing the interval value will slow down the animation, and decreasing it will speed it up. Locate the following line of code in the `<script>` section:
-
-```javascript
-const pathAnimationInterval = 100; // Adjust the interval to control the visualization speed
 
